@@ -1,0 +1,87 @@
+/* web/css/lens-content.css — стили панели контента */
+
+.content-panel {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin: 8px 0;
+    background: var(--card);}
+.content-panel-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);}
+.content-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;}
+.content-btn:hover {background: #e8e8e8; border-color: var(--ink3);}
+#contentTypeSelect {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card);}
+.content-panel-body {padding: 12px 16px; min-height: 48px;}
+.content-textarea {
+    width: 100%;
+    min-height: 240px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    border: none;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    line-height: 1.5;}
+.content-empty {
+    color: var(--ink3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;}
+.content-view {
+    font-size: 14px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;}
+.content-link {color: var(--accent); text-decoration: none;}
+.content-link:hover {text-decoration: underline;}
+.content-link-ext {color: var(--accent2); text-decoration: none;}
+.content-link-ext::after {content: ' ↗'; font-size: 11px;}
+.content-markdown h1, .content-markdown h2, .content-markdown h3 {margin: 12px 0 6px; font-weight: 600;}
+.content-markdown code {
+    background: var(--bg2);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;}
+.content-markdown ul {padding-left: 20px; margin: 6px 0;}
+.content-markdown pre {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    overflow-x: auto;
+    margin: 8px 0;
+    white-space: pre-wrap;}
+.content-markdown pre code {
+    background: none;
+    padding: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;}
+.content-panel-body img {max-width: 100%; height: auto;}
+.content-panel-body iframe {
+    max-width: 100%;
+    width: 100%;
+    aspect-ratio: 16/9;
+    height: auto;}

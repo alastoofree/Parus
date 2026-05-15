@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PARUS</title>
+  <link rel="icon" id="favicon" href="img/favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/portal.css">
+  <link rel="stylesheet" href="css/project.css">
+  <link rel="stylesheet" href="css/graph.css">
+</head>
+<body>
+<header>
+  <div class="breadcrumbs">
+    <a class="breadcrumb-link" href="portal.html">PARADIGMA</a>
+    <span class="breadcrumb-sep">→</span>
+    <span class="breadcrumb-current" id="breadcrumbProject"></span>
+    <span class="project-counts" id="projectCounts"></span>
+    <button class="btn-icon" id="btnSettings" title="parametra" style="width:32px;height:32px;border-radius:50%;background:#2a5caa;border-color:#2a5caa;color:white;font-size:0.9rem;margin-left:auto">⚙</button>
+    <button class="btn-icon" id="btnRebuild" title="rebuild index" style="width:32px;height:32px;border-radius:50%;background:#aa5c2a;border-color:#aa5c2a;color:white;font-size:0.9rem;margin-left:0.5rem">↺</button>
+    <button class="btn-icon" id="btnCreateFrame" title="add concept" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem;margin-left:0.5rem">+</button>
+  </div>
+</header>
+<div class="cli-bar">
+  <span class="cli-prefix">&gt;</span>
+  <input class="cli-input" id="cliInput" type="text"
+    placeholder="quest or instruction..." autocomplete="off" spellcheck="false">
+</div>
+<main>
+  <div class="page-title">CONCEPTS</div>
+  <div id="baseLensContainer"></div>
+  <div class="bases-list" id="framesList"></div>
+</main>
+<!-- PANEL: create frame -->
+<div class="panel-overlay" id="panelCreateFrame">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">new concept</span>
+      <button class="btn-icon" id="btnSaveCreateFrame" title="create" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem;margin-left:auto">+</button>
+      <button class="btn-close" id="btnCloseCreateFrame">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-m</span>
+          <span class="slot-key-name">title</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="inputFrameTitle" placeholder="..." autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- PANEL: settings theme -->
+<div class="panel-overlay" id="panelSettings">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">parametra — <span id="settingsId" style="font-weight:300"></span></span>
+      <button class="btn-icon" id="btnSaveSettings" title="record" style="width:32px;height:32px;border-radius:50%;background:#e8a838;border-color:#e8a838;color:white;font-size:0.9rem;margin-left:auto">✓</button>
+      <button class="btn-close" id="btnCloseSettings">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">fundament</div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-m</span>
+          <span class="slot-key-name">title</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsTitle" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-l</span>
+          <span class="slot-key-name">a-sort</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsASort" placeholder="alphabet order" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-r</span>
+          <span class="slot-key-name">o-lens</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsOLens"
+            placeholder="graph tags content rank tab chrono slots"
+            autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-h</span>
+          <span class="slot-key-name">ranks</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsRanks" placeholder="gauss-indexes of frames with rank" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-g</span>
+          <span class="slot-key-name">tabs</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsTabs" placeholder="gauss-indexes of frames with tab" autocomplete="off">
+        </div>
+      </div>
+      <div class="section-label">graph</div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-k</span>
+          <span class="slot-key-name">west</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsWest" placeholder="links tags includes product" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-c</span>
+          <span class="slot-key-name">nord</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsNord" placeholder="links tags includes product" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-t</span>
+          <span class="slot-key-name">graph</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsGraph" placeholder="-list +list -west -nord -east -south" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-d</span>
+          <span class="slot-key-name">list</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsList" placeholder="-links -tags -includes -product" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-b</span>
+          <span class="slot-key-name">chrono</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsChrono" placeholder="+retro -retro" autocomplete="off">
+        </div>
+      </div>
+      <div class="section-label">match</div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-s</span>
+          <span class="slot-key-name">deep-nord</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsDeepNord" placeholder="3" autocomplete="off">
+        </div>
+      </div>
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-z</span>
+          <span class="slot-key-name">deep-south</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="settingsDeepSouth" placeholder="3" autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<script type="module" src="js/project.js"></script>
+<script>
+const days = ['day-sunday','day-monday','day-tuesday','day-wednesday','day-thursday','day-friday','day-saturday'];
+document.body.classList.add(days[new Date().getDay()]);
+</script>
+</body>
+</html>

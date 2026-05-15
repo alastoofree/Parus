@@ -1,0 +1,25 @@
+<svg width="200" height="200" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Комментарий: ГРАДИЕНТ (ИСПРАВЛЕН) - теперь привязан к координатам SVG, а не элемента -->
+    <linearGradient id="spectrumGradient" x1="36" y1="50" x2="65" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFD700" />
+      <stop offset="50%" stop-color="#FF007F" />
+      <stop offset="100%" stop-color="#9400D3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Комментарий: Общая окружность-контейнер -->
+  <circle cx="50" cy="50" r="45" fill="#FFFFFF" stroke="#808080" stroke-width="2"/>
+
+  <!-- Комментарий: Левый узел (вход) -->
+  <circle cx="25" cy="50" r="10" fill="#E50000"/>
+
+  <!-- Комментарий: Правый узел (выход) -->
+  <circle cx="75" cy="50" r="10" fill="#4B0082"/>
+
+  <!-- Комментарий: СТРЕЛКА (ИСПРАВЛЕНА) -->
+  <!-- Тело стрелки: начинается у края левого узла (x=35) и идет до начала острия (x=62) -->
+  <line x1="36" y1="50" x2="62" y2="50" stroke="url(#spectrumGradient)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Острие стрелки: упирается в край правого узла (x=65) -->
+  <polygon points="61,46 65,50 61,54" fill="url(#spectrumGradient)"/>
+</svg>

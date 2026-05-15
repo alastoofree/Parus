@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PARADIGMA - Personal intellect-system</title>
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+<header>
+<div class="logo">PARA<span>DIGMA</span></div>
+<div style="margin-left:auto;display:flex;gap:0.5rem">
+  <button class="btn-icon" id="btnTerms" title="terminology" onclick="window.location.href='terms.html'" style="width:32px;height:32px;border-radius:50%;background:#6b6760;border-color:#6b6760;color:white;font-size:0.9rem">T</button>
+  <button class="btn-icon" id="btnCreate" title="add theme" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem">+</button>
+</div>
+</header>
+  <div class="cli-bar">
+    <span class="cli-prefix">&gt;</span>
+    <input class="cli-input" id="searchInput" type="text"
+      placeholder="search all bases..." autocomplete="off" spellcheck="false">
+ </div>
+<main>
+  <div class="page-title">THEMES</div>
+  <div class="bases-list" id="basesList"></div>
+</main>
+<!-- PANEL: create theme -->
+<div class="panel-overlay" id="panelCreate">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title" id="panelLabel">New theme</span>
+      <button class="btn-icon" id="btnSaveCreate" title="create" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem;margin-left:auto">+</button>
+      <button class="btn-close" id="btnCloseCreate">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">Fundament</div>
+      <div class="slot-pair">
+        <div class="slot-key">
+            <span class="slot-key-index">l-l</span>
+            <span class="slot-key-name">title</span></div>
+        <div class="slot-value"><input type="text" id="inputTitle" placeholder="New theme" autocomplete="off"></div>
+      </div>
+      <div class="section-label">Gauss-index order</div>
+      <div class="slot-pair config">
+        <div class="slot-key">
+            <span class="slot-key-index">r-of</span>
+            <span class="slot-key-name">order of file</span></div>
+        <div class="slot-value">
+            <input type="text" id="inputFileOrder" placeholder="oo" autocomplete="off" maxlength="8">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="js/portal.js"></script>
+<script>
+const days = ['day-sunday','day-monday','day-tuesday','day-wednesday','day-thursday','day-friday','day-saturday'];
+document.body.classList.add(days[new Date().getDay()]);
+</script>
+</body>
+</html>

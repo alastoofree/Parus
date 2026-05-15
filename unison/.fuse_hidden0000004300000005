@@ -1,0 +1,327 @@
+// parseq/unison/graph.go
+
+package unison
+
+import (
+	"fmt"
+	"strings"
+)
+
+// GraphData — данные графа для одного фрейма
+//
+//	Left   — links-in    (входящие ссылки)
+//	Top    — tags-of     (теги: в каких списках состоит этот фрейм)
+//	Right  — alias       (синонимы/алиасы)
+//	Bottom — includes-in (кто включает этот фрейм через трансклюзию)
+type GraphData struct {
+	Center GraphNode   `json:"center"`
+	Left   []GraphNode `json:"left"`
+	Top    []GraphNode `json:"top"`
+	Right  []GraphNode `json:"right"`
+	Bottom []GraphNode `json:"bottom"`
+}
+
+// GraphNode — узел графа
+type GraphNode struct {
+	Index     string      `json:"index"`
+	Title     string      `json:"title"`
+	Neighbors []GraphNode `json:"neighbors,omitempty"`
+}
+
+// Имена слотов в метафрейме (индексный файл)
+const (
+	SlotAllTitles    = "all-titles"
+	SlotLinksOut     = "links-out"
+	SlotLinksIn      = "links-in"
+	SlotTagsOfFrame  = "tags-of-frame"
+	SlotContentOfTag = "content-of-tag"
+	SlotAliasLocal   = "alias-local"
+	SlotIncludesOut  = "includes-out"
+	SlotIncludesIn   = "includes-in"
+)
+
+// Имена слотов в самом фрейме (то что пишет автор)
+const (
+	FrameSlotLinksOut = "links-out"
+	FrameSlotTags     = "tags"
+	FrameSlotAlias    = "alias"
+	FrameSlotIncludes = "includes"
+)
+
+// BuildGraphIndex обходит все фреймы проекта и обновляет метафрейм
+// индексами связей. Вызывается после каждого сохранения фрейма.
+func BuildGraphIndex(projectID string) error {
+	p, err := LoadProject(projectID)
+	if err != nil {
+		return fmt.Errorf("load project: %w", err)
+	}
+
+	frames, err := ListFrames(projectID, p.Meta)
+	if err != nil {
+		return fmt.Errorf("list frames: %w", err)
+	}
+
+	sol := p.Meta.SlotOrderLen
+
+	// Индексы для резолвинга
+	titleToIndex := make(map[string]string)
+	frameTitle   := make(map[string]string)
+
+	for _, f := range frames {
+		t := framePairRight(f, "title")
+		frameTitle[f.Index] = t
+		if t != "" {
+			titleToIndex[strings.ToLower(t)] = f.Index
+		}
+	}
+
+	// Карты связей
+	linksOut    := make(map[string][]string)
+	linksIn     := make(map[string][]string)
+	tagsOf      := make(map[string][]string)
+	contentOf   := make(map[string][]string)
+	aliasMap    := make(map[string][]string)
+	includesOut := make(map[string][]string)
+	includesIn  := make(map[string][]string)
+
+	for _, f := range frames {
+		src := f.Index
+
+		for _, ref := range parseTokenList(framePairRight(f, FrameSlotLinksOut)) {
+			if tgt, ok := resolveRef(ref, titleToIndex, frames); ok && tgt != src {
+				linksOut[src] = appendUnique(linksOut[src], tgt)
+				linksIn[tgt]  = appendUnique(linksIn[tgt], src)
+			}
+		}
+
+		for _, ref := range parseTokenList(framePairRight(f, FrameSlotTags)) {
+			if tgt, ok := resolveRef(ref, titleToIndex, frames); ok && tgt != src {
+				tagsOf[src]    = appendUnique(tagsOf[src], tgt)
+				contentOf[tgt] = appendUnique(contentOf[tgt], src)
+			}
+		}
+
+		for _, ref := range parseTokenList(framePairRight(f, FrameSlotAlias)) {
+			if tgt, ok := resolveRef(ref, titleToIndex, frames); ok && tgt != src {
+				aliasMap[src] = appendUnique(aliasMap[src], tgt)
+			}
+		}
+
+		for _, ref := range parseTokenList(framePairRight(f, FrameSlotIncludes)) {
+			if tgt, ok := resolveRef(ref, titleToIndex, frames); ok && tgt != src {
+				includesOut[src] = appendUnique(includesOut[src], tgt)
+				includesIn[tgt]  = appendUnique(includesIn[tgt], src)
+			}
+		}
+	}
+
+	// all-titles
+	var sbT strings.Builder
+	for _, f := range frames {
+		sbT.WriteString(quoteIfSpace(frameTitle[f.Index]) + " ")
+	}
+	allTitles := strings.TrimSpace(sbT.String())
+
+	fmtMap := func(m map[string][]string) string {
+		var b strings.Builder
+		for _, f := range frames {
+			b.WriteString(f.Index + " [ ")
+			for _, id := range m[f.Index] {
+				b.WriteString(id + " ")
+			}
+			b.WriteString("] ")
+		}
+		return strings.TrimSpace(b.String())
+	}
+
+	meta := p.Meta
+	updates := []struct{ left, right string }{
+		{SlotAllTitles,    allTitles},
+		{SlotLinksOut,     fmtMap(linksOut)},
+		{SlotLinksIn,      fmtMap(linksIn)},
+		{SlotTagsOfFrame,  fmtMap(tagsOf)},
+		{SlotContentOfTag, fmtMap(contentOf)},
+		{SlotAliasLocal,   fmtMap(aliasMap)},
+		{SlotIncludesOut,  fmtMap(includesOut)},
+		{SlotIncludesIn,   fmtMap(includesIn)},
+	}
+
+	for _, u := range updates {
+		found := false
+		for i, pair := range meta.Frame.Pairs {
+			if pair.Left == u.left {
+				meta.Frame.Pairs[i].Right = u.right
+				found = true
+				break
+			}
+		}
+		if !found {
+			ti := ToGauss(len(meta.Frame.Pairs), sol)
+			meta.Frame.Pairs = append(meta.Frame.Pairs, SlotPair{
+				TypeIndex: ti,
+				Left:      u.left,
+				Right:     u.right,
+			})
+		}
+	}
+
+	return WriteMetaFrame(projectID, meta)
+}
+
+// GetGraphData возвращает данные графа для конкретного фрейма
+func GetGraphData(projectID, frameIndex string) (GraphData, error) {
+	p, err := LoadProject(projectID)
+	if err != nil {
+		return GraphData{}, fmt.Errorf("load project: %w", err)
+	}
+
+	frames, err := ListFrames(projectID, p.Meta)
+	if err != nil {
+		return GraphData{}, fmt.Errorf("list frames: %w", err)
+	}
+
+	titleMap := make(map[string]string)
+	for _, f := range frames {
+		titleMap[f.Index] = framePairRight(f, "title")
+	}
+
+	linksInMap    := parseMapSlot(p.Meta.Frame, SlotLinksIn)
+	tagsOfMap     := parseMapSlot(p.Meta.Frame, SlotTagsOfFrame)
+	aliasMap      := parseMapSlot(p.Meta.Frame, SlotAliasLocal)
+	includesInMap := parseMapSlot(p.Meta.Frame, SlotIncludesIn)
+	linksOutMap   := parseMapSlot(p.Meta.Frame, SlotLinksOut)
+
+	resolve := func(idx string) GraphNode {
+		title := titleMap[idx]
+		if title == "" {
+			title = idx
+		}
+		var neighbors []GraphNode
+		for _, nIdx := range linksOutMap[idx] {
+			nt := titleMap[nIdx]
+			if nt == "" {
+				nt = nIdx
+			}
+			neighbors = append(neighbors, GraphNode{Index: nIdx, Title: nt})
+		}
+		return GraphNode{Index: idx, Title: title, Neighbors: neighbors}
+	}
+
+	resolveList := func(ids []string) []GraphNode {
+		result := make([]GraphNode, 0, len(ids))
+		for _, id := range ids {
+			result = append(result, resolve(id))
+		}
+		return result
+	}
+
+	centerTitle := titleMap[frameIndex]
+	if centerTitle == "" {
+		centerTitle = frameIndex
+	}
+
+	return GraphData{
+		Center: GraphNode{Index: frameIndex, Title: centerTitle},
+		Left:   resolveList(linksInMap[frameIndex]),
+		Top:    resolveList(tagsOfMap[frameIndex]),
+		Right:  resolveList(aliasMap[frameIndex]),
+		Bottom: resolveList(includesInMap[frameIndex]),
+	}, nil
+}
+
+// ── Вспомогательные ─────────────────────────────────────────────────────────
+
+func framePairRight(f Frame, key string) string {
+	for _, p := range f.Pairs {
+		if p.Left == key {
+			return p.Right
+		}
+	}
+	return ""
+}
+
+func parseTokenList(s string) []string {
+	var result []string
+	s = strings.TrimSpace(s)
+	for s != "" {
+		var token string
+		if len(s) > 0 && s[0] == '"' {
+			end := strings.Index(s[1:], `"`)
+			if end < 0 {
+				token = s[1:]
+				s = ""
+			} else {
+				token = s[1 : end+1]
+				s = strings.TrimSpace(s[end+2:])
+			}
+		} else {
+			idx := strings.IndexByte(s, ' ')
+			if idx < 0 {
+				token = s
+				s = ""
+			} else {
+				token = s[:idx]
+				s = strings.TrimSpace(s[idx+1:])
+			}
+		}
+		if token != "" {
+			result = append(result, token)
+		}
+	}
+	return result
+}
+
+func parseList(s string) []string { return parseTokenList(s) }
+
+func parseMapSlot(f Frame, slotName string) map[string][]string {
+	result := make(map[string][]string)
+	raw := framePairRight(f, slotName)
+	if raw == "" {
+		return result
+	}
+	tokens := parseList(raw)
+	i := 0
+	for i < len(tokens) {
+		key := tokens[i]
+		i++
+		if i < len(tokens) && tokens[i] == "[" {
+			i++
+			for i < len(tokens) && tokens[i] != "]" {
+				result[key] = append(result[key], tokens[i])
+				i++
+			}
+			if i < len(tokens) {
+				i++
+			}
+		}
+	}
+	return result
+}
+
+func resolveRef(ref string, titleToIndex map[string]string, frames []Frame) (string, bool) {
+	if idx, ok := titleToIndex[strings.ToLower(ref)]; ok {
+		return idx, true
+	}
+	for _, f := range frames {
+		if f.Index == ref {
+			return ref, true
+		}
+	}
+	return "", false
+}
+
+func appendUnique(slice []string, s string) []string {
+	for _, v := range slice {
+		if v == s {
+			return slice
+		}
+	}
+	return append(slice, s)
+}
+
+func quoteIfSpace(s string) string {
+	if strings.Contains(s, " ") {
+		return `"` + s + `"`
+	}
+	return s
+}

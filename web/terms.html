@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TERMINUS</title>
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/portal.css">
+  <link rel="stylesheet" href="css/terms.css">
+</head>
+<body>
+<header>
+  <a class="breadcrumb-link" href="portal.html">PARADIGMA</a>
+  <span class="breadcrumb-sep">→</span>
+  <span class="breadcrumb-current">TERMINUS</span>
+  <span id="termCounts" class="term-counts"></span>
+  <div style="margin-left:auto;display:flex;gap:0.5rem">
+    <button class="btn-icon" id="btnCreateTerm" title="add term" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem">+</button>
+  </div>
+</header>
+<div class="cli-bar">
+  <span class="cli-prefix">&gt;</span>
+  <input class="cli-input" id="cliInput" type="text"
+    placeholder="search..." autocomplete="off" spellcheck="false">
+</div>
+<main>
+  <div class="page-title">TERMINUS</div>
+  <div class="bases-list" id="termsList"></div>
+</main>
+<!-- PANEL: create term -->
+<div class="panel-overlay" id="panelCreateTerm">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">new term</span>
+      <button class="btn-icon" id="btnSaveCreateTerm" title="create" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem;margin-left:auto">+</button>
+      <button class="btn-close" id="btnCloseCreateTerm">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-n</span>
+          <span class="slot-key-name">name</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="inputTermName" placeholder="..." autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<script type="module" src="js/terms/terms.js"></script>
+<script>
+const days = ['day-sunday','day-monday','day-tuesday','day-wednesday','day-thursday','day-friday','day-saturday'];
+document.body.classList.add(days[new Date().getDay()]);
+</script>
+</body>
+</html>

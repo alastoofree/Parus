@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TERMINUS</title>
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/project.css">
+  <link rel="stylesheet" href="css/frame.css">
+  <link rel="stylesheet" href="css/graph.css">
+  <link rel="stylesheet" href="css/lens-tags.css">
+  <link rel="stylesheet" href="css/lens-content.css">
+  <link rel="stylesheet" href="css/lens-rank.css">
+  <link rel="stylesheet" href="css/lens-tab.css">
+  <link rel="stylesheet" href="css/terms.css">
+</head>
+<body>
+<header>
+  <div class="breadcrumbs" style="flex:1">
+    <a class="breadcrumb-link" href="portal.html">PARADIGMA</a>
+    <span class="breadcrumb-sep">→</span>
+    <a class="breadcrumb-link" href="terms.html">TERMINUS</a>
+    <span class="breadcrumb-sep">→</span>
+    <span class="breadcrumb-current" id="breadcrumbTerm"></span>
+  </div>
+  <button class="btn-icon" id="btnNewTerm" title="new term" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem">+</button>
+  <button class="btn-icon" id="btnCloneTerm" title="clone term" style="width:32px;height:32px;border-radius:50%;background:#2a5caa;border-color:#2a5caa;color:white;font-size:0.9rem;margin-left:0.5rem">⧉</button>
+  <button class="btn-icon" id="btnAddSlot" title="add slot" style="width:32px;height:32px;border-radius:50%;background:#6b6760;border-color:#6b6760;color:white;font-size:1.1rem;margin-left:0.5rem">+</button>
+  <button class="btn-icon" id="btnSave" title="save" style="width:32px;height:32px;border-radius:50%;background:#e8a838;border-color:#e8a838;color:white;font-size:0.9rem;margin-left:0.5rem">✓</button>
+</header>
+<div class="cli-bar">
+  <span class="cli-prefix">&gt;</span>
+  <input class="cli-input" id="cliInput" type="text"
+    placeholder="search..." autocomplete="off" spellcheck="false">
+</div>
+<div id="searchResults" class="hidden"></div>
+<main>
+<div class="dag-root" id="dagRoot">
+  <div class="dag-toggle-bar" style="justify-content:flex-end">
+    <button class="dag-toggle-btn" id="dagToggleBtn" title="graph">✦</button>
+    <button class="dag-toggle-btn" id="tagsToggleBtn" title="tags">⬡</button>
+    <button class="dag-toggle-btn" id="contentToggleBtn" title="content">≡</button>
+    <button class="dag-toggle-btn" id="processToggleBtn" title="process" style="display:none">⊛</button>
+    <button class="dag-toggle-btn" id="chronoToggleBtn" title="chrono" style="display:none">⊕</button>
+    <button class="dag-toggle-btn" id="rankToggleBtn" title="rank" style="display:none">◈</button>
+    <button class="dag-toggle-btn" id="tocToggleBtn" title="tabs" style="display:none">↕</button>
+    <button class="dag-toggle-btn" id="slotsToggleBtn" title="slots">⊞</button>
+  </div>
+  <div class="dag-container hidden" id="dagContainer"></div>
+  <div class="dag-container hidden" id="tagsContainer"></div>
+  <div class="dag-container hidden" id="contentContainer"></div>
+  <div class="dag-container hidden" id="processContainer"></div>
+  <div class="dag-container hidden" id="chronoContainer"></div>
+  <div class="dag-container hidden" id="rankContainer"></div>
+  <div class="dag-container hidden" id="tocContainer"></div>
+</div>
+<div id="slotsContainer" class="hidden">
+  <div class="slots-list" id="slotsList"></div>
+</div>
+</main>
+<!-- PANEL: create term -->
+<div class="panel-overlay" id="panelCreateTerm">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">new term</span>
+      <button class="btn-icon" id="btnSaveCreateTerm" title="create" style="width:32px;height:32px;border-radius:50%;background:#2a7a2a;border-color:#2a7a2a;color:white;font-size:1.1rem;margin-left:auto">+</button>
+      <button class="btn-close" id="btnCloseCreateTerm">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="slot-pair">
+        <div class="slot-key">
+          <span class="slot-key-index">l-n</span>
+          <span class="slot-key-name">name</span>
+        </div>
+        <div class="slot-value">
+          <input type="text" id="inputTermName" placeholder="..." autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<script type="module" src="js/terms/term.js"></script>
+<script>
+const days = ['day-sunday','day-monday','day-tuesday','day-wednesday','day-thursday','day-friday','day-saturday'];
+document.body.classList.add(days[new Date().getDay()]);
+</script>
+</body>
+</html>

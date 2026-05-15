@@ -1,0 +1,72 @@
+/* web/css/frame.css — стили страницы фрейма */
+
+.frame-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;}
+.frame-header-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink3);
+  flex-shrink: 0;}
+.slots-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;}
+.slot-row {
+  display: flex;
+  border: 1px solid var(--border);
+  border-bottom: none;}
+.slot-row:first-child { border-radius: 4px 4px 0 0; }
+.slot-row:last-child  { border-bottom: 1px solid var(--border); border-radius: 0 0 4px 4px; }
+.slot-row:only-child  { border-radius: 4px; border-bottom: 1px solid var(--border); }
+.slot-row.readonly    { background: var(--bg2); }
+.slot-cell {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  border-right: 1px solid var(--border);}
+.slot-cell:last-child { border-right: none; }
+.slot-cell input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  background: transparent;
+  font-family: 'Spectral', serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  outline: none;}
+.slot-cell input:focus { background: rgba(42,92,170,0.04); }
+.slot-cell.readonly input {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--ink3);
+  cursor: default;}
+.slot-cell.key input { color: var(--ink2); }
+.slot-cell.key input:focus { color: var(--ink); }
+.slot-row-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ink3);
+  padding: 0 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  border-right: 1px solid var(--border);
+  background: var(--bg2);}
+.slots-list { background: var(--card); }
+.frame-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);}
+.frame-ulid {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--ink3);}
+.footer-actions {display: flex; gap: 0.75rem;}

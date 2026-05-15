@@ -1,0 +1,158 @@
+/* web/css/graph.css — стили графа версии V
+   Добавить в <head> frame.html: <link rel="stylesheet" href="../css/graph.css">
+   Цветовые переменные для типов связей совместимы с :root из style.css */
+
+:root {
+    /* Цвета типов связей */
+    --graph-west:    #2a7a2a;   /* — акцент зелёный */
+    --graph-nord:     #7a4a9e;   /* — фиолетовый */
+    --graph-east:    #c8401a;   /* — акцент красный */
+    --graph-south:    #ffa500;   /* — оранжевый */
+    /* Фон узлов (очень бледный оттенок цвета) */
+    --graph-west-bg: rgba(42, 122, 42, 0.06);
+    --graph-nord-bg:  rgba(122, 74, 158, 0.06);
+    --graph-east-bg: rgba(200, 64, 26, 0.06);
+    --graph-south-bg: rgba(42, 92, 170, 0.06);  }
+/* ── Контейнер ─────────────────────────────────── */
+.dag-root {margin-bottom: 2rem;}
+.dag-toggle-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;}
+.dag-toggle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink3);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;}
+.dag-toggle-btn:hover {
+    background: var(--bg2);
+    color: var(--ink);
+    border-color: var(--ink3);}
+.dag-toggle-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;}
+.dag-container {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card);
+    overflow-x: auto;
+    padding: 0.5rem 0;}
+.dag-container.hidden { display: none; }
+/* ── SVG ─────────────────────────────── */
+.dag-svg {display: block; margin: 0 auto;}
+/* ── Узел ─────────────────────────────── */
+.dag-node {cursor: pointer; transition: opacity 0.15s;}
+.dag-node:hover { opacity: 0.75; }
+.dag-node-rect {
+    fill: var(--card);
+    stroke: var(--border);
+    stroke-width: 1.5px;}
+.dag-node:hover .dag-node-rect {
+    fill: var(--bg2);
+    stroke: var(--ink3);}
+/* Центральный узел */
+.dag-node-center {cursor: default;}
+.dag-node-center:hover { opacity: 1; }
+.dag-node-center .dag-node-rect {
+    fill: var(--bg2);
+    stroke: var(--ink2);
+    stroke-width: 2px;}
+/* ── Триггер тултипа ───────────────── */
+.dag-trigger { cursor: pointer; }
+.dag-trigger-arrow {fill: var(--border); transition: fill 0.1s;}
+.dag-trigger-arrow.active {fill: var(--ink3);}
+.dag-node:hover .dag-trigger-arrow.active {fill: var(--ink);}
+/* ── Разделитель ──────────────────── */
+.dag-divider {
+    margin: 0.75rem 0;
+    border: none;
+    border-top: 1px solid var(--border);}
+/* ── Список ───────────────────────── */
+.dag-list {
+    padding: 0 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;}
+.dag-section {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: var(--ink2);}
+.dag-section-label {
+    color: var(--ink3);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;}
+.dag-section-west .dag-section-label { color: var(--graph-west); }
+.dag-section-nord  .dag-section-label { color: var(--graph-nord);  }
+.dag-section-east .dag-section-label { color: var(--graph-east); }
+.dag-section-south .dag-section-label { color: var(--graph-south); }
+/* ── Ссылки в списке ────────────── */
+.dag-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.1s;}
+.dag-link:hover { color: var(--ink); }
+.dag-link-secondary {
+    color: var(--ink2);
+    font-weight: 400;}
+.dag-link-secondary:hover { color: var(--ink); }
+.dag-link-sep {
+    color: var(--ink3, #888);
+    font-size: 0.8rem;
+    user-select: none;}
+/* ── Тултип ──────────────────── */
+.dag-tooltip {
+    position: fixed;
+    background: var(--ink, #1a1814);
+    color: var(--bg, #f5f2ec);
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    max-width: 220px;
+    pointer-events: auto;}
+.dag-tooltip-title {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.15);}
+.dag-tooltip-title:hover { text-decoration: underline; }
+.dag-tooltip-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;}
+.dag-tooltip-list a {
+    color: rgba(245, 242, 236, 0.7);
+    text-decoration: none;
+    display: block;
+    transition: color 0.1s;}
+.dag-tooltip-list a:hover {color: var(--bg, #f5f2ec); text-decoration: underline;}
+/* ── Состояния ──────────────────── */
+.dag-loading, .dag-error {
+    padding: 1.5rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink3);}
+.dag-error { color: var(--accent2); }

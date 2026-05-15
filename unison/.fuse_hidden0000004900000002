@@ -1,0 +1,338 @@
+// unison/meta_graph.go — граф локального контекста глобального тега
+//
+// Адаптация GetGraphData для метабазы.
+//
+// Позиции метаграфа:
+//   Left   — теги которым принадлежит центральный тег  (он в их tags)
+//   Top    — базы где тег присутствует                 (global-tags-of-base)
+//   Right  — теги которые принадлежат центральному тегу (они в его tags)
+//   Bottom — базы с пересечением по титулу             (meta-match-depth)
+//
+// Center.Neighbors — алиасы тега (аналог alias в локальном графе)
+//
+// Слоты индекса в метафрейме метабазы:
+//   meta-tags-of     — tagIdx [ globalTagIdx ... ]
+//   meta-content-of  — tagIdx [ globalTagIdx ... ]
+//   meta-bases-of    — tagIdx [ baseID ... ]
+//   meta-base-match  — tagIdx [ baseID ... ]
+//   meta-match-depth — число (минимальная длина совпадения токенов)
+
+package unison
+
+import (
+	"fmt"
+	"strings"
+)
+
+const (
+	MetaSlotTagsOf     = "meta-tags-of"
+	MetaSlotContentOf  = "meta-content-of"
+	MetaSlotBasesOf    = "meta-bases-of"
+	MetaSlotBaseMatch  = "meta-base-match"
+	MetaSlotMatchDepth = "meta-match-depth"
+)
+
+// BuildMetaGraphIndex строит индексы метаграфа в метафрейме метабазы.
+// Вызывается из handleGraph когда projectID == MetaBaseName.
+func BuildMetaGraphIndex() error {
+	metaProj, err := LoadProject(MetaBaseName)
+	if err != nil {
+		return fmt.Errorf("load meta-base: %w", err)
+	}
+
+	// Параметр глубины совпадения (по умолчанию 3)
+	matchDepth := 3
+	for _, p := range metaProj.Meta.Frame.Pairs {
+		if p.Left == MetaSlotMatchDepth {
+			if d := parseIntDefault(p.Right, 3); d > 0 {
+				matchDepth = d
+			}
+			break
+		}
+	}
+
+	// Все глобальные теги — фреймы метабазы
+	tags, err := ListFrames(MetaBaseName, metaProj.Meta)
+	if err != nil {
+		return fmt.Errorf("list meta frames: %w", err)
+	}
+
+	// frameMap для быстрого доступа к фреймам метабазы
+	tagFrameMap := make(map[string]Frame)
+	for _, f := range tags {
+		tagFrameMap[f.Index] = f
+	}
+
+	// ── Строим связи между глобальными тегами ────────────────────────────────
+	// Карта source:sourceIndex → globalTagIndex для резолвинга локальных ссылок
+	sourceKeyToGlobal := make(map[string]string)
+	for _, f := range tags {
+		src         := framePairRight(f, "source")
+		srcIdx      := framePairRight(f, "source-index")
+		if src != "" && src != "meta" && srcIdx != "" {
+			sourceKeyToGlobal[src+":"+srcIdx] = f.Index
+		}
+	}
+
+	tagsOf    := make(map[string][]string)
+	contentOf := make(map[string][]string)
+
+	for _, f := range tags {
+		globalSrc   := f.Index
+		source      := framePairRight(f, "source")
+		sourceIndex := framePairRight(f, "source-index")
+		if source == "" || source == "meta" || sourceIndex == "" { continue }
+
+		// Загружаем фрейм-источник из локальной базы
+		sourceFrame, err := LoadFrame(source, sourceIndex)
+		if err != nil { continue }
+
+		// tags содержит гаусс-индексы локальных тегов
+		for _, localTagIdx := range parseTokenList(framePairRight(sourceFrame, "tags")) {
+			// Резолвим через source:localTagIdx → глобальный индекс
+			tgt := sourceKeyToGlobal[source+":"+localTagIdx]
+			if tgt != "" && tgt != globalSrc {
+				tagsOf[globalSrc] = appendUnique(tagsOf[globalSrc], tgt)
+				contentOf[tgt]    = appendUnique(contentOf[tgt], globalSrc)
+			}
+		}
+	}
+
+	// ── Базы где тег присутствует — инвертируем global-tags-of-base ──────────
+	basesOfTag := make(map[string][]string) // tagIdx → []baseID
+	tagsOfBase := parseMapSlot(metaProj.Meta.Frame, "global-tags-of-base")
+	for baseID, tagIdxs := range tagsOfBase {
+		for _, tagIdx := range tagIdxs {
+			basesOfTag[tagIdx] = appendUnique(basesOfTag[tagIdx], baseID)
+		}
+	}
+
+	// ── Базы с пересечением по титулу тега ───────────────────────────────────
+	baseMatch := make(map[string][]string) // tagIdx → []baseID
+
+	// Читаем список баз из метафрейма
+	basesID     := parseTokenList(framePairRight(metaProj.Meta.Frame, "bases-id"))
+	basesTitles := parseQuotedList(framePairRight(metaProj.Meta.Frame, "bases-title"))
+
+	baseTitleMap := make(map[string]string)
+	for i, id := range basesID {
+		if i < len(basesTitles) {
+			baseTitleMap[id] = basesTitles[i]
+		}
+	}
+
+	for _, f := range tags {
+		tagTokens := metaTokenize(framePairRight(f, "title"))
+		for i, baseID := range basesID {
+			if i >= len(basesTitles) { break }
+			if metaTitlesOverlap(tagTokens, metaTokenize(basesTitles[i]), matchDepth) {
+				baseMatch[f.Index] = appendUnique(baseMatch[f.Index], baseID)
+			}
+		}
+	}
+
+	// ── Форматируем и записываем в метафрейм ─────────────────────────────────
+	sol := metaProj.Meta.SlotOrderLen
+
+	fmtMap := func(m map[string][]string) string {
+		var b strings.Builder
+		for _, f := range tags {
+			b.WriteString(f.Index + " [ ")
+			for _, id := range m[f.Index] {
+				b.WriteString(id + " ")
+			}
+			b.WriteString("] ")
+		}
+		return strings.TrimSpace(b.String())
+	}
+
+	meta := metaProj.Meta
+	updates := []struct{ left, right string }{
+		{MetaSlotTagsOf,    fmtMap(tagsOf)},
+		{MetaSlotContentOf, fmtMap(contentOf)},
+		{MetaSlotBasesOf,   fmtMap(basesOfTag)},
+		{MetaSlotBaseMatch, fmtMap(baseMatch)},
+	}
+
+	for _, u := range updates {
+		found := false
+		for i, pair := range meta.Frame.Pairs {
+			if pair.Left == u.left {
+				meta.Frame.Pairs[i].Right = u.right
+				found = true
+				break
+			}
+		}
+		if !found {
+			ti := ToGauss(len(meta.Frame.Pairs), sol)
+			meta.Frame.Pairs = append(meta.Frame.Pairs, SlotPair{
+				TypeIndex: ti,
+				Left:      u.left,
+				Right:     u.right,
+			})
+		}
+	}
+
+	return WriteMetaFrame(MetaBaseName, meta)
+}
+
+// GetMetaGraphData возвращает GraphData для глобального тега.
+// Структура полностью аналогична GetGraphData — те же типы, тот же JSON.
+func GetMetaGraphData(tagIndex string) (GraphData, error) {
+	metaProj, err := LoadProject(MetaBaseName)
+	if err != nil {
+		return GraphData{}, fmt.Errorf("load meta-base: %w", err)
+	}
+
+	// Все глобальные теги
+	tags, err := ListFrames(MetaBaseName, metaProj.Meta)
+	if err != nil {
+		return GraphData{}, fmt.Errorf("list meta frames: %w", err)
+	}
+
+	// titleMap и frameMap — аналог GetGraphData
+	titleMap := make(map[string]string)
+	frameMap := make(map[string]Frame)
+	for _, f := range tags {
+		titleMap[f.Index] = framePairRight(f, "title")
+		frameMap[f.Index] = f
+	}
+
+	// baseTitleMap
+	basesID     := parseTokenList(framePairRight(metaProj.Meta.Frame, "bases-id"))
+	basesTitles := parseQuotedList(framePairRight(metaProj.Meta.Frame, "bases-title"))
+	baseTitleMap := make(map[string]string)
+	for i, id := range basesID {
+		if i < len(basesTitles) {
+			baseTitleMap[id] = basesTitles[i]
+		}
+	}
+
+	// Читаем индексы метаграфа из метафрейма
+	tagsOfMap     := parseMapSlot(metaProj.Meta.Frame, MetaSlotTagsOf)
+	contentOfMap  := parseMapSlot(metaProj.Meta.Frame, MetaSlotContentOf)
+	basesOfMap    := parseMapSlot(metaProj.Meta.Frame, MetaSlotBasesOf)
+	baseMatchMap  := parseMapSlot(metaProj.Meta.Frame, MetaSlotBaseMatch)
+	// Для соседей узлов-баз — другие теги той же базы
+	tagsOfBaseMap := parseMapSlot(metaProj.Meta.Frame, "global-tags-of-base")
+
+	// ── resolve — аналог resolve в GetGraphData ───────────────────────────────
+	// Для узла-тега: Neighbors = теги с которыми он связан в противоположной позиции
+	// Для узла-базы: Index = baseID, Title = название базы, Neighbors = пусто
+	resolveTag := func(idx string, neighborMap map[string][]string) GraphNode {
+		title := titleMap[idx]
+		if title == "" { title = idx }
+		var neighbors []GraphNode
+		for _, nIdx := range neighborMap[idx] {
+			nt := titleMap[nIdx]
+			if nt == "" { nt = nIdx }
+			neighbors = append(neighbors, GraphNode{Index: nIdx, Title: nt})
+		}
+		if neighbors == nil { neighbors = []GraphNode{} }
+		f := frameMap[idx]
+		return GraphNode{
+			Index:     idx,
+			Title:     title,
+			Neighbors: neighbors,
+			Icon:      framePairRight(f, "icon"),
+			Color:     framePairRight(f, "color"),
+			Rank:      framePairRight(f, "tag"),
+		}
+	}
+
+	// resolveBase — узел базы, Index получает префикс "base:" для навигации
+	resolveBase := func(baseID string) GraphNode {
+		title := baseTitleMap[baseID]
+		if title == "" { title = baseID }
+		neighbors := make([]GraphNode, 0)
+		for _, tagIdx := range tagsOfBaseMap[baseID] {
+			if tagIdx == tagIndex { continue }
+			nt := titleMap[tagIdx]
+			if nt == "" { nt = tagIdx }
+			neighbors = append(neighbors, GraphNode{Index: tagIdx, Title: nt})
+		}
+		return GraphNode{Index: "base:" + baseID, Title: title, Neighbors: neighbors}
+	}
+
+	resolveTagList := func(ids []string, neighborMap map[string][]string) []GraphNode {
+		result := make([]GraphNode, 0, len(ids))
+		for _, id := range ids {
+			result = append(result, resolveTag(id, neighborMap))
+		}
+		return result
+	}
+
+	resolveBaseList := func(ids []string) []GraphNode {
+		result := make([]GraphNode, 0, len(ids))
+		for _, id := range ids {
+			result = append(result, resolveBase(id))
+		}
+		return result
+	}
+
+	// ── Center — аналог center в GetGraphData ────────────────────────────────
+	centerTitle := titleMap[tagIndex]
+	if centerTitle == "" { centerTitle = tagIndex }
+
+	// Neighbors центра — алиасы тега (аналог alias в локальном графе)
+	centerNeighbors := make([]GraphNode, 0)
+	if f, ok := frameMap[tagIndex]; ok {
+		for _, a := range parseTokenList(framePairRight(f, "aliases")) {
+			centerNeighbors = append(centerNeighbors,
+				GraphNode{Index: a, Title: a})
+		}
+	}
+
+	center := GraphNode{
+		Index:     tagIndex,
+		Title:     centerTitle,
+		Neighbors: centerNeighbors,
+		Rank:      framePairRight(frameMap[tagIndex], "tag"),
+	}
+
+	return GraphData{
+		Center: center,
+		Left:   resolveTagList(tagsOfMap[tagIndex],    contentOfMap),
+		Top:    resolveBaseList(basesOfMap[tagIndex]),
+		Right:  resolveTagList(contentOfMap[tagIndex], tagsOfMap),
+		Bottom: resolveBaseList(baseMatchMap[tagIndex]),
+	}, nil
+}
+
+// ── Вспомогательные ──────────────────────────────────────────────────────────
+
+func metaTokenize(s string) []string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	return strings.FieldsFunc(s, func(r rune) bool {
+		return r == ' ' || r == '-' || r == '_'
+	})
+}
+
+func metaTitlesOverlap(a, b []string, depth int) bool {
+	for _, ta := range a {
+		ra := []rune(ta)
+		if len(ra) < depth { continue }
+		for _, tb := range b {
+			rb := []rune(tb)
+			if len(rb) < depth { continue }
+			d := depth
+			if len(ra) < d { d = len(ra) }
+			if len(rb) < d { d = len(rb) }
+			if strings.HasPrefix(string(rb), string(ra[:d])) ||
+				strings.HasPrefix(string(ra), string(rb[:d])) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func parseIntDefault(s string, def int) int {
+	n := 0
+	for _, c := range s {
+		if c < '0' || c > '9' { return def }
+		n = n*10 + int(c-'0')
+	}
+	if n == 0 { return def }
+	return n
+}

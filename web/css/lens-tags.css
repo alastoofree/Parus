@@ -1,0 +1,163 @@
+/* web/css/lens-tags.css — стили линзы тегов */
+
+.tags-panel {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin: 8px 0;
+  background: var(--card);}
+.tags-panel-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  margin-bottom: 8px;}
+.tag-pill {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg2);
+  border: 1px solid var(--border, #d0d8e4);
+  border-radius: 12px;
+  padding: 2px 8px 2px 10px;
+  font-size: 0.82rem;
+  font-family: 'Spectral', serif;
+  color: var(--ink, #1a1a2e);
+  cursor: default;}
+.tag-pill-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--ink3);
+  margin-left: 2px;}
+.tag-pill-remove {
+  cursor: pointer;
+  color: var(--ink3);
+  font-size: 0.9rem;
+  padding: 0 2px;
+  line-height: 1;}
+.tag-pill-remove:hover { color: var(--accent2); }
+.tags-panel-input-wrap {position: relative;}
+.tags-panel-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'Spectral', serif;
+  font-size: 0.88rem;
+  outline: none;
+  box-sizing: border-box;}
+.tags-panel-input:focus { border-color: var(--accent); }
+.tags-autocomplete {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;}
+.tags-autocomplete-item {
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-family: 'Spectral', serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;}
+.tags-autocomplete-item:hover { background: var(--bg2); }
+.tags-autocomplete-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--ink3);}
+.tags-autocomplete-new {color: var(--accent); font-style: italic;}
+.tags-autocomplete-new:hover { background: #e8f0f8; }
+.tags-panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;}
+/* ── Список фреймов тега ──────────────────────────────── */
+.tag-pill-title {cursor: pointer; text-decoration: underline dotted;}
+.tag-pill-title:hover { color: var(--accent); }
+.tag-pill-expand {
+  cursor: pointer;
+  color: var(--ink3);
+  padding: 0 2px;
+  font-size: 0.8rem;}
+.tag-pill-expand:hover { color: var(--ink, #1a1a2e); }
+.tag-pill-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 180px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 200;
+  padding: 4px 0;}
+.tag-pill-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  text-decoration: none;
+  color: var(--ink, #1a1a2e);
+  font-size: 0.85rem;
+  font-family: 'Spectral', serif;}
+.tag-pill-list-item:hover { background: var(--bg2); }
+.tag-pill-list-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--ink3);
+  margin-left: 8px;}
+.tag-pill-list-empty {
+  display: block;
+  padding: 6px 12px;
+  color: #999;
+  font-size: 0.82rem;
+  font-style: italic;}
+.tag-pill-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  margin-right: 4px;
+  vertical-align: middle;}
+.tag-pill-icon-svg {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  margin-right: 4px;
+  flex-shrink: 0;}
+.tag-pill-icon-svg svg {
+  width: 14px;
+  height: 14px;}
+.tag-pill-list-marker {
+  font-size: 0.7rem;
+  color: var(--ink3);
+  margin-right: 6px;
+  flex-shrink: 0;}
+.tag-pill-global {
+  border-color: #7a6fa6;
+  background: #f0edf8;}
+.tag-pill-global-marker {
+  font-size: 0.75rem;
+  color: #7a6fa6;
+  margin-right: 3px;}
+.tags-autocomplete-sep {
+  padding: 4px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink3);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;}
+.tags-autocomplete-global {color: #7a6fa6;}
+.tags-autocomplete-global:hover { background: #f0edf8; }

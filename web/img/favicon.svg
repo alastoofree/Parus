@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .red { fill: #FF0000; }
+      .blue { fill: #0080FF; }
+      .brighter-yellow { fill: #FFEA00; }
+      .gray { fill: #AAAAAA; }
+    </style>
+  </defs>
+
+  <circle class="gray" cx="50" cy="30" r="12" />
+  <circle class="brighter-yellow" cx="50" cy="60" r="12" />
+  <circle class="blue" cx="25" cy="75" r="12" />
+  <circle class="red" cx="75" cy="75" r="12" />
+</svg>

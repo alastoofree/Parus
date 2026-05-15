@@ -1,0 +1,44 @@
+/* web/css/lens-rank.css — стили линзы ранга */
+
+.rank-loading, .rank-empty {
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--ink3, #888);}
+.rank-tree {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin: 8px 0;
+  background: var(--card);}
+.rank-node {margin: 2px 0;}
+.rank-children {
+  padding-left: 20px;
+  border-left: 1px solid var(--border);
+  margin-left: 8px;}
+.rank-children.hidden { display: none; }
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  border-radius: 3px;}
+.rank-row:hover { background: var(--bg2); }
+.rank-arrow {
+  font-size: 0.65rem;
+  color: var(--ink3, #888);
+  cursor: pointer;
+  width: 12px;
+  flex-shrink: 0;
+  user-select: none;}
+.rank-arrow-has-children:hover { color: var(--ink, #1a1a2e); }
+.rank-marker {
+  font-size: 0.7rem;
+  color: var(--ink3, #888);
+  flex-shrink: 0;}
+.rank-link {
+  font-family: 'Spectral', serif;
+  font-size: 0.88rem;
+  color: var(--ink, #1a1a2e);
+  text-decoration: none;}
+.rank-link:hover {color: var(--accent); text-decoration: underline dotted;}

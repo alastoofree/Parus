@@ -1,0 +1,48 @@
+/* web/css/project.css — стили страницы базы (список фреймов) */
+
+.base-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;}
+.btn-back {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--ink3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.1s;}
+.btn-back:hover { color: var(--accent); }
+.base-header-title { font-size: 1.2rem; font-weight: 400; }
+.base-header-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink3);}
+.project-counts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink3, #888);
+  margin-left: 8px;}
+.base-item-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 4px;}
+.base-item-tag {
+  font-size: 0.7rem;
+  color: var(--ink3, #888);
+  margin-left: auto;
+  padding-right: 8px;}
+.breadcrumbs { flex: 1; }
+.slot-select {
+  width: 100%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  cursor: pointer;}
